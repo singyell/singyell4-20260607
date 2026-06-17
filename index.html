@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Singyell — 3D Artist, CGI Specialist & Creative Technologist</title>
+  <meta name="description" content="Portfolio of Singyell, an award-winning 3D artist specializing in photorealistic rendering, CGI motion, and interactive spatial visuals.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Frameworks & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Three.js for interactive 3D elements -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            space: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              purple: '#8b5cf6',
+              cyan: '#06b6d4',
+              dark: '#09090b',
+              card: '#18181b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+
+    /* Custom Transitions and Keyframes */
+    @keyframes fadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+        filter: blur(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0px);
+      }
+    }
+    @keyframes portraitFall {
+      0% {
+        opacity: 0;
+        transform: translateY(-200px) scale(0.5) rotate(-10deg);
+        filter: blur(4px);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(8px) scale(1.05) rotate(2deg);
+        filter: blur(0px);
+      }
+      80% {
+        transform: translateY(-4px) scale(0.98) rotate(-1deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+        filter: blur(0px);
+      }
+    }
+    @keyframes word-reveal {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.08); }
+    }
+
+    .border-gradient {
+      position: relative;
+    }
+    .border-gradient::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.5px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(6, 182, 212, 0.4) 50%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+    }
+
+    /* Gradient Blur Footer / Background Panels */
+    .gradient-blur {
+      position: fixed;
+      z-index: 2;
+      inset: auto 0 0 0;
+      height: 35%;
+      pointer-events: none;
+    }
+    .gradient-blur > div {
+      position: absolute;
+      inset: 0;
+    }
+    .gradient-blur::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      backdrop-filter: blur(1px);
+      mask: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 0) 75%);
+    }
+
+    .animate-badge-redrop {
+      animation: portraitFall 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .type-words .w {
+      display: inline-block;
+      opacity: 0;
+      animation: word-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Scroll animations configuration */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .scroll-reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Card styling */
+    .glass-card {
+      background: rgba(24, 24, 27, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
+</head>
+<body class="antialiased text-neutral-100 bg-neutral-950 font-sans overflow-x-hidden selection:bg-brand-purple/30 selection:text-white">
+
+  <!-- Background Interactive Mesh Canvas (Fallback & Atmosphere) -->
+  <div class="fixed inset-0 w-full h-full -z-20 overflow-hidden pointer-events-none opacity-40">
+    <div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-brand-purple/20 rounded-full blur-[140px] animate-[pulse-slow_12s_infinite]"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-brand-cyan/15 rounded-full blur-[160px] animate-[pulse-slow_18s_infinite_2s]"></div>
+  </div>
+
+  <!-- Spline retro-futurism background element from the original design -->
+  <div class="absolute top-0 left-0 w-full h-screen -z-10 opacity-70 pointer-events-none overflow-hidden">
+    <iframe src="https://my.spline.design/retrofuturismbganimation-Lb3VtL1bNaYUnirKNzn0FvaW" frameborder="0" width="100%" height="100%" class="scale-110 origin-center min-h-screen"></iframe>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-950/40 to-neutral-950"></div>
+  </div>
+
+  <!-- Bottom screen gradient blur overlays -->
+  <div class="gradient-blur">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <!-- Floating custom Toast Notification system -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm pointer-events-none"></div>
+
+  <!-- NAVIGATION -->
+  <header class="fixed z-40 bg-neutral-950/60 w-full top-0 backdrop-blur-xl border-b border-white/[0.05] transition-all duration-300" id="main-header">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="flex items-center justify-between py-5">
+        <a href="#" class="flex items-center gap-3 group">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-purple to-brand-cyan p-[1px]">
+            <div class="w-full h-full bg-neutral-950 rounded-[7px] flex items-center justify-center font-space font-bold text-sm tracking-tighter group-hover:bg-transparent transition-all duration-300">
+              S
+            </div>
+          </div>
+          <span class="text-xl font-bold font-space tracking-wide bg-gradient-to-r from-white via-neutral-100 to-neutral-400 bg-clip-text text-transparent">
+            Singyell
+          </span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-neutral-400">
+          <a href="#featured-work" class="hover:text-white transition-colors duration-200">Featured</a>
+          <a href="#portfolio-grid" class="hover:text-white transition-colors duration-200">Portfolio</a>
+          <a href="#about" class="hover:text-white transition-colors duration-200">About</a>
+          <a href="#services" class="hover:text-white transition-colors duration-200">Services</a>
+          <a href="#estimator" class="hover:text-white transition-colors duration-200">Quote Tool</a>
+          <a href="#contact" class="hover:text-white transition-colors duration-200">Contact</a>
+        </nav>
+
+        <!-- CTAs / Socials -->
+        <div class="flex items-center gap-4">
+          <a href="#contact" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 border-gradient hover:text-white text-xs font-semibold tracking-tight bg-white/5 rounded-full px-5 py-2.5 backdrop-blur-xl hover:bg-white/10">
+            Hire Me
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+          </a>
+          
+          <button class="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition" id="mobile-menu-toggle" aria-label="Toggle menu">
+            <i data-lucide="menu" class="w-5 h-5 text-neutral-200" id="menu-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      <nav id="mobile-menu" class="lg:hidden hidden border-t border-white/5 overflow-hidden transition-all duration-500 max-h-0 bg-neutral-950/95 backdrop-blur-2xl">
+        <div class="flex flex-col py-6 space-y-4 font-medium text-neutral-300">
+          <a href="#featured-work" class="hover:text-white transition py-2 text-base">Featured Work</a>
+          <a href="#portfolio-grid" class="hover:text-white transition py-2 text-base">All Works</a>
+          <a href="#about" class="hover:text-white transition py-2 text-base">About Singyell</a>
+          <a href="#services" class="hover:text-white transition py-2 text-base">Services</a>
+          <a href="#estimator" class="hover:text-white transition py-2 text-base">Interactive Quote Tool</a>
+          <a href="#contact" class="hover:text-white transition py-2 text-base">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <main class="relative z-10 pt-20">
+    <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 relative lg:py-32">
+      <!-- Top Badge -->
+      <div class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 border border-white/10 text-xs font-medium text-neutral-300 backdrop-blur-md animate-badge-redrop mb-6">
+        <i data-lucide="sparkles" class="w-4 h-4 text-brand-purple"></i>
+        <span>Award-Winning CGI Specialist & 3D Artist</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="leading-[1.05] font-extrabold text-white tracking-tight mt-0 mb-6 font-space" style="animation: fadeSlideIn 1s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;">
+        <span class="block text-[9vw] sm:text-6xl md:text-7xl lg:text-8xl flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop" onerror="this.src='https://placehold.co/250x250/333/fff?text=Singyell'" alt="Singyell Avatar" class="w-[10vw] h-[10vw] sm:w-[70px] sm:h-[70px] lg:w-[96px] lg:h-[96px] rounded-full object-cover border-2 border-brand-purple/40 shadow-2xl animate-[portraitFall_1.5s_cubic-bezier(0.34,1.56,0.64,1)_both_0.4s]">
+          Crafting
+        </span>
+        <span class="block text-[9vw] sm:text-6xl md:text-7xl lg:text-8xl bg-gradient-to-r from-brand-purple via-violet-400 to-brand-cyan bg-clip-text text-transparent py-2">
+          photorealistic 3D
+        </span>
+        <span class="block text-[9vw] sm:text-6xl md:text-7xl lg:text-8xl">universes</span>
+      </h1>
+
+      <!-- Animating Subtitle -->
+      <p class="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-neutral-400 type-words leading-relaxed mb-10" id="typing-subtitle">
+        <!-- Subtitle dynamically segmented for individual animation triggers -->
+        <span class="w" style="animation-delay: 0.1s">Specializing&nbsp;</span>
+        <span class="w" style="animation-delay: 0.2s">in&nbsp;</span>
+        <span class="w" style="animation-delay: 0.3s">cinematic&nbsp;</span>
+        <span class="w" style="animation-delay: 0.4s">CGI,&nbsp;</span>
+        <span class="w" style="animation-delay: 0.5s">product&nbsp;</span>
+        <span class="w" style="animation-delay: 0.6s">visualizations,&nbsp;</span>
+        <span class="w" style="animation-delay: 0.7s">and&nbsp;</span>
+        <span class="w" style="animation-delay: 0.8s">spatial&nbsp;</span>
+        <span class="w" style="animation-delay: 0.9s">artistry.&nbsp;</span>
+        <span class="w" style="animation-delay: 1.0s">Translating&nbsp;</span>
+        <span class="w" style="animation-delay: 1.1s">bold&nbsp;</span>
+        <span class="w" style="animation-delay: 1.2s">imaginations&nbsp;</span>
+        <span class="w" style="animation-delay: 1.3s">into&nbsp;</span>
+        <span class="w" style="animation-delay: 1.4s">breathtaking&nbsp;</span>
+        <span class="w" style="animation-delay: 1.5s">digital&nbsp;</span>
+        <span class="w" style="animation-delay: 1.6s">reality.&nbsp;</span>
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-6" style="animation: fadeSlideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both 0.6s;">
+        <a href="#portfolio-grid" class="w-full sm:w-auto relative group inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-neutral-950 font-bold rounded-full overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(139,92,246,0.5)] hover:-translate-y-0.5">
+          <span class="relative z-10 flex items-center gap-2">
+            Explore Portfolio
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </span>
+          <div class="absolute inset-0 bg-gradient-to-r from-brand-cyan to-brand-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </a>
+
+        <a href="#estimator" class="w-full sm:w-auto group inline-flex items-center justify-center gap-2 px-8 py-4 glass-card text-white font-semibold rounded-full border border-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5 relative">
+          <span>Cost Estimator</span>
+          <i data-lucide="sliders" class="w-4 h-4 group-hover:rotate-12 transition-transform"></i>
+          <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-brand-purple to-transparent opacity-50 group-hover:w-20 transition-all"></span>
+        </a>
+      </div>
+
+      <!-- Quick Metrics/Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12 mt-20 pt-10 border-t border-white/5 w-full max-w-4xl text-left" style="animation: fadeSlideIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) both 0.8s;">
+        <div class="space-y-1">
+          <p class="text-3xl md:text-4xl font-extrabold font-space text-white flex items-center gap-1" id="stat-years">
+            <span>8</span><span class="text-brand-purple">+</span>
+          </p>
+          <p class="text-xs md:text-sm text-neutral-400 font-medium">Years Active Experience</p>
+        </div>
+        <div class="space-y-1">
+          <p class="text-3xl md:text-4xl font-extrabold font-space text-white flex items-center gap-1" id="stat-projects">
+            <span>150</span><span class="text-brand-cyan">+</span>
+          </p>
+          <p class="text-xs md:text-sm text-neutral-400 font-medium">Global Projects Completed</p>
+        </div>
+        <div class="col-span-2 md:col-span-1 space-y-1">
+          <p class="text-3xl md:text-4xl font-extrabold font-space text-white flex items-center gap-1" id="stat-awards">
+            <span>12</span><span class="text-violet-400">🏅</span>
+          </p>
+          <p class="text-xs md:text-sm text-neutral-400 font-medium">Industry Creative Awards</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE 3D EMBEDDED DEMO -->
+    <section class="max-w-7xl mx-auto px-6 mb-24 scroll-reveal">
+      <div class="glass-card rounded-3xl p-6 md:p-10 border border-white/5 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Interactive Canvas Holder -->
+        <div class="lg:col-span-7 h-[350px] sm:h-[450px] w-full rounded-2xl bg-neutral-950/80 border border-white/5 relative group cursor-grab active:cursor-grabbing">
+          <div id="three-canvas-container" class="w-full h-full rounded-2xl overflow-hidden"></div>
+          
+          <!-- Instructions overlay -->
+          <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none text-xs text-neutral-400 bg-neutral-900/80 backdrop-blur-md py-2 px-4 rounded-xl border border-white/5">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="rotate-3d" class="w-4 h-4 text-brand-cyan animate-pulse"></i>
+              Interactive: Drag and scroll to interact
+            </span>
+            <button id="three-reset-btn" class="pointer-events-auto hover:text-white transition-colors flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-purple">
+            <span class="w-2 h-2 rounded-full bg-brand-purple animate-ping"></span>
+            Real-Time Render Playground
+          </div>
+          <h3 class="text-3xl font-bold font-space text-white tracking-tight">
+            Realizing abstract spatial layouts in real-time
+          </h3>
+          <p class="text-neutral-400 leading-relaxed text-sm md:text-base">
+            This viewport compiles a live procedural particle constellation powered by Three.js. It shows Singyell's commitment to bridging real-time computing and spatial aesthetics. Drag the geometry to adjust perspective, rotation, and light sources.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-2">
+            <span class="px-3 py-1 bg-neutral-900 border border-white/5 text-xs text-neutral-300 rounded-full">WebGL 2.0</span>
+            <span class="px-3 py-1 bg-neutral-900 border border-white/5 text-xs text-neutral-300 rounded-full">Three.js</span>
+            <span class="px-3 py-1 bg-neutral-900 border border-white/5 text-xs text-neutral-300 rounded-full">Procedural Geometries</span>
+            <span class="px-3 py-1 bg-neutral-900 border border-white/5 text-xs text-neutral-300 rounded-full">OrbitControls</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED WORK CAROUSEL -->
+    <section id="featured-work" class="py-24 max-w-7xl mx-auto px-6 scroll-reveal relative">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div class="space-y-4">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-cyan uppercase">
+            Featured Masterpieces
+          </div>
+          <h2 class="text-4xl md:text-5xl font-extrabold font-space text-white tracking-tight">
+            Curated Showpieces
+          </h2>
+          <p class="text-neutral-400 max-w-2xl">
+            A premium selection of Singyell's highest-tier visuals and cinematic creations developed for commercial campaigns and digital exhibitions.
+          </p>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex items-center gap-3">
+          <button id="carousel-prev" class="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition flex items-center justify-center text-white focus:outline-none" aria-label="Previous work">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+          <button id="carousel-next" class="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition flex items-center justify-center text-white focus:outline-none" aria-label="Next work">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Carousel Track Container -->
+      <div class="relative overflow-hidden -mx-6 px-6">
+        <div id="carousel-track" class="flex gap-6 transition-transform duration-500 ease-out cursor-grab active:cursor-grabbing py-4" style="transform: translateX(0px);">
+          
+          <!-- Slide 1 -->
+          <div class="carousel-slide min-w-[85vw] sm:min-w-[60vw] md:min-w-[45vw] lg:min-w-[500px] aspect-[16/10] rounded-2xl overflow-hidden glass-card relative group border border-white/5 select-none shrink-0" data-idx="0">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" alt="Abstract render">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 p-6 flex flex-col justify-end">
+              <span class="text-xs font-semibold text-brand-purple tracking-widest uppercase mb-1">CGI • Surrealism</span>
+              <h3 class="text-xl md:text-2xl font-bold font-space text-white mb-1">Neon Obelisks</h3>
+              <p class="text-sm text-neutral-300 opacity-80 mb-4">A high-fidelity spatial visualization testing refraction & organic volumetric lighting.</p>
+              <div class="flex items-center gap-2">
+                <button onclick="openLightbox('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200', 'Neon Obelisks', 'Organic volumetric lighting environment')" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-semibold rounded-full border border-white/10 transition flex items-center gap-1.5">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Inspect Render
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="carousel-slide min-w-[85vw] sm:min-w-[60vw] md:min-w-[45vw] lg:min-w-[500px] aspect-[16/10] rounded-2xl overflow-hidden glass-card relative group border border-white/5 select-none shrink-0" data-idx="1">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" alt="Architectural render">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 p-6 flex flex-col justify-end">
+              <span class="text-xs font-semibold text-brand-cyan tracking-widest uppercase mb-1">Visualization • Architecture</span>
+              <h3 class="text-xl md:text-2xl font-bold font-space text-white mb-1">Minimalist Oasis</h3>
+              <p class="text-sm text-neutral-300 opacity-80 mb-4">Photorealistic rendering for high-end digital real-estate, balancing interior lighting.</p>
+              <div class="flex items-center gap-2">
+                <button onclick="openLightbox('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200', 'Minimalist Oasis', 'Arch-Viz lighting with real-time solar tracking')" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-semibold rounded-full border border-white/10 transition flex items-center gap-1.5">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Inspect Render
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="carousel-slide min-w-[85vw] sm:min-w-[60vw] md:min-w-[45vw] lg:min-w-[500px] aspect-[16/10] rounded-2xl overflow-hidden glass-card relative group border border-white/5 select-none shrink-0" data-idx="2">
+            <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" alt="Organic Render">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 p-6 flex flex-col justify-end">
+              <span class="text-xs font-semibold text-brand-purple tracking-widest uppercase mb-1">3D Art • Metaworld</span>
+              <h3 class="text-xl md:text-2xl font-bold font-space text-white mb-1">Biomorphic Flow</h3>
+              <p class="text-sm text-neutral-300 opacity-80 mb-4">Generative glass structures mimicking microbial textures, detailed sub-surface scatter.</p>
+              <div class="flex items-center gap-2">
+                <button onclick="openLightbox('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200', 'Biomorphic Flow', 'Generative glass microbial geometries')" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-semibold rounded-full border border-white/10 transition flex items-center gap-1.5">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Inspect Render
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4 -->
+          <div class="carousel-slide min-w-[85vw] sm:min-w-[60vw] md:min-w-[45vw] lg:min-w-[500px] aspect-[16/10] rounded-2xl overflow-hidden glass-card relative group border border-white/5 select-none shrink-0" data-idx="3">
+            <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none" alt="Product render">
+            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 p-6 flex flex-col justify-end">
+              <span class="text-xs font-semibold text-brand-cyan tracking-widest uppercase mb-1">Industrial • Automotive</span>
+              <h3 class="text-xl md:text-2xl font-bold font-space text-white mb-1">Hyperdrive Spec</h3>
+              <p class="text-sm text-neutral-300 opacity-80 mb-4">CGI studio product reveal mockup testing high-contrast carbon metallic fibers.</p>
+              <div class="flex items-center gap-2">
+                <button onclick="openLightbox('https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1200', 'Hyperdrive Spec', 'Automotive chassis carbon fiber study')" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-semibold rounded-full border border-white/10 transition flex items-center gap-1.5">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Inspect Render
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTERABLE PORTFOLIO GRID -->
+    <section id="portfolio-grid" class="py-24 max-w-7xl mx-auto px-6 scroll-reveal">
+      <div class="space-y-4 mb-12 text-center md:text-left">
+        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-purple uppercase">
+          Dynamic Portfolio
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold font-space text-white tracking-tight">
+          Explore Singyell's Creations
+        </h2>
+        <p class="text-neutral-400 max-w-2xl mx-auto md:mx-0">
+          Filter projects across disciplines. Click on any creative piece below to launch the details lightbox.
+        </p>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="flex flex-wrap items-center gap-2 mb-10 pb-4 border-b border-white/5">
+        <button onclick="filterPortfolio('all')" class="portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-brand-purple text-white border border-brand-purple/20">
+          All Projects
+        </button>
+        <button onclick="filterPortfolio('3d-art')" class="portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-400 hover:text-white border border-white/5">
+          3D Art
+        </button>
+        <button onclick="filterPortfolio('cgi')" class="portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-400 hover:text-white border border-white/5">
+          CGI Motion
+        </button>
+        <button onclick="filterPortfolio('products')" class="portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-400 hover:text-white border border-white/5">
+          Product Design
+        </button>
+        <button onclick="filterPortfolio('architectural')" class="portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-400 hover:text-white border border-white/5">
+          Architectural
+        </button>
+      </div>
+
+      <!-- Grid Layout -->
+      <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300">
+        
+        <!-- Grid item 1 (3D Art) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="3d-art">
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Abstract render">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-purple uppercase tracking-widest mb-1">3D Art</span>
+            <h4 class="text-lg font-bold font-space text-white">Chromastic Refraction</h4>
+            <p class="text-xs text-neutral-300 mb-4">Detailed investigation of prism structures and chromatic dispersion models.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200', 'Chromastic Refraction', 'Spectral prism structures in Octane Render')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid item 2 (CGI) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="cgi">
+          <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Cyberpunk rendering">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-cyan uppercase tracking-widest mb-1">CGI Motion</span>
+            <h4 class="text-lg font-bold font-space text-white">Grid Construct</h4>
+            <p class="text-xs text-neutral-300 mb-4">Procedural assembly of glowing digital hardware nodes designed for Web3 cinematic promos.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200', 'Grid Construct', 'Interactive node animations rendered in Houdini')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid item 3 (Products) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="products">
+          <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Product rendering">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-purple uppercase tracking-widest mb-1">Product Design</span>
+            <h4 class="text-lg font-bold font-space text-white">Chrono Horizon Watch</h4>
+            <p class="text-xs text-neutral-300 mb-4">Industrial presentation modeling demonstrating premium gold leaf materials and precision micro-geometries.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1200', 'Chrono Horizon Watch', 'Luxury metallic and carbon composites rendering')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid item 4 (Architectural) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="architectural">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Architectural rendering">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-cyan uppercase tracking-widest mb-1">Architectural</span>
+            <h4 class="text-lg font-bold font-space text-white">The Concrete Pavilion</h4>
+            <p class="text-xs text-neutral-300 mb-4">Warm lighting interaction, concrete grain displacement layers, and digital vegetation modeling.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200', 'The Concrete Pavilion', 'Architectural lighting exploration')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid item 5 (3D Art) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="3d-art">
+          <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Fluid Glass">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-purple uppercase tracking-widest mb-1">3D Art</span>
+            <h4 class="text-lg font-bold font-space text-white">Dynamic Viscosity</h4>
+            <p class="text-xs text-neutral-300 mb-4">Fluid simulation detailing liquid viscosity, refraction, and subsurface neon scatter.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200', 'Dynamic Viscosity', 'Refractive liquid and glass render study')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid item 6 (CGI) -->
+        <div class="portfolio-grid-card group relative rounded-2xl overflow-hidden aspect-square border border-white/5 bg-neutral-900" data-category="cgi">
+          <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none" alt="Space portal">
+          <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
+            <span class="text-xs font-bold text-brand-cyan uppercase tracking-widest mb-1">CGI Motion</span>
+            <h4 class="text-lg font-bold font-space text-white">Quantum Singularity</h4>
+            <p class="text-xs text-neutral-300 mb-4">VFX black hole simulation displaying high-velocity stellar acceleration dust lanes.</p>
+            <button onclick="openLightbox('https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=1200', 'Quantum Singularity', 'Relativistic dust lane simulations')" class="self-start text-xs font-semibold text-white flex items-center gap-1 hover:underline">
+              View Render Details <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABOUT SECTION & SKILLS MATRIX -->
+    <section id="about" class="py-24 max-w-7xl mx-auto px-6 scroll-reveal">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+        
+        <!-- Left: Bio Statement -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-purple uppercase">
+            Creative Mind Behind The Renders
+          </div>
+          <h2 class="text-4xl md:text-5xl font-extrabold font-space text-white tracking-tight">
+            I am Singyell.
+          </h2>
+          <p class="text-neutral-300 text-lg leading-relaxed font-light">
+            I turn conceptual sparks into hyper-vivid, photorealistic space structures, functional packaging simulations, and high-energy cinematic CGI movies.
+          </p>
+          <p class="text-neutral-400 text-sm leading-relaxed">
+            By combining complex procedural math in Houdini with precise global illumination models in Unreal Engine and Octane Render, my objective is to generate visuals that don't just mimic reality—they elevate it. My studio helps developers, spatial architects, and premium tech startups establish their visual footprint.
+          </p>
+          <div class="p-6 rounded-2xl glass-card border border-white/5 space-y-4">
+            <p class="text-xs text-brand-cyan font-bold tracking-widest uppercase">Select Clients & Accolades</p>
+            <div class="grid grid-cols-2 gap-4 text-xs font-medium text-neutral-300">
+              <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-purple"></i> Spatial VR Inc.</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-purple"></i> Chronos Wearables</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-purple"></i> CG Architect Awards</span>
+              <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-purple"></i> Webby Nominations</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Animated Skills Grid -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="glass-card rounded-3xl p-8 border border-white/5 space-y-6">
+            <h3 class="text-2xl font-bold font-space text-white">Engine Proficiency & Tech Stack</h3>
+            <p class="text-xs text-neutral-400">
+              Hover over tools or view estimated expertise ratings calculated based on production flight hours.
+            </p>
+
+            <div class="space-y-4">
+              <!-- Skill 1 -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium text-neutral-200">Blender / Cycle Engines</span>
+                  <span class="font-mono text-brand-purple text-xs font-semibold">95%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-brand-purple to-violet-400 rounded-full transition-all duration-1000 scale-x-0 origin-left" style="width: 95%" id="skill-bar-1"></div>
+                </div>
+              </div>
+
+              <!-- Skill 2 -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium text-neutral-200">Houdini FX / VFX Particles</span>
+                  <span class="font-mono text-brand-cyan text-xs font-semibold">88%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-brand-cyan to-cyan-400 rounded-full transition-all duration-1000 scale-x-0 origin-left" style="width: 88%" id="skill-bar-2"></div>
+                </div>
+              </div>
+
+              <!-- Skill 3 -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium text-neutral-200">Unreal Engine 5 (Lumen/Nanite)</span>
+                  <span class="font-mono text-brand-purple text-xs font-semibold">92%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-brand-purple to-violet-400 rounded-full transition-all duration-1000 scale-x-0 origin-left" style="width: 92%" id="skill-bar-3"></div>
+                </div>
+              </div>
+
+              <!-- Skill 4 -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium text-neutral-200">Cinema 4D / Redshift</span>
+                  <span class="font-mono text-brand-cyan text-xs font-semibold">85%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-brand-cyan to-cyan-400 rounded-full transition-all duration-1000 scale-x-0 origin-left" style="width: 85%" id="skill-bar-4"></div>
+                </div>
+              </div>
+
+              <!-- Skill 5 -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium text-neutral-200">Three.js / WebGL / Shaders</span>
+                  <span class="font-mono text-brand-purple text-xs font-semibold">78%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-brand-purple to-violet-400 rounded-full transition-all duration-1000 scale-x-0 origin-left" style="width: 78%" id="skill-bar-5"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- INTERACTIVE PROJECT ESTIMATOR -->
+    <section id="estimator" class="py-24 max-w-7xl mx-auto px-6 scroll-reveal">
+      <div class="glass-card rounded-3xl p-8 md:p-12 border border-white/5 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="max-w-3xl mb-12">
+          <span class="text-xs font-bold text-brand-cyan tracking-widest uppercase block mb-2">Live Cost Tool</span>
+          <h2 class="text-3xl md:text-4xl font-extrabold font-space text-white tracking-tight">
+            Configure Your Production
+          </h2>
+          <p class="text-neutral-400 text-sm md:text-base mt-2">
+            Fine-tune project scope sliders and rendering levels to view real-time estimates of budgets, production timelines, and compute milestones.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          
+          <!-- Sliders and selectors -->
+          <div class="lg:col-span-7 space-y-8">
+            
+            <!-- Scope selection -->
+            <div class="space-y-4">
+              <label class="text-sm font-semibold text-neutral-200 block">1. Select Project Horizon Type</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button onclick="updateScope('asset')" class="estimator-type-btn p-4 rounded-xl border border-brand-purple/50 bg-brand-purple/10 text-white transition text-left space-y-1" data-type="asset">
+                  <p class="font-bold text-sm">Product Reveal</p>
+                  <p class="text-[11px] text-neutral-300">Single asset detailed loop.</p>
+                </button>
+                <button onclick="updateScope('scene')" class="estimator-type-btn p-4 rounded-xl border border-white/5 bg-neutral-900/60 text-neutral-400 transition text-left space-y-1" data-type="scene">
+                  <p class="font-bold text-sm">Landscape Scene</p>
+                  <p class="text-[11px] text-neutral-400">Environment design & setup.</p>
+                </button>
+                <button onclick="updateScope('cinematic')" class="estimator-type-btn p-4 rounded-xl border border-white/5 bg-neutral-900/60 text-neutral-400 transition text-left space-y-1" data-type="cinematic">
+                  <p class="font-bold text-sm">Cinematic Ad</p>
+                  <p class="text-[11px] text-neutral-400">Full VFX movie loop.</p>
+                </button>
+              </div>
+            </div>
+
+            <!-- Number of deliverables -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label for="deliverables-slider" class="text-sm font-semibold text-neutral-200">2. Deliverables / Render Angles</label>
+                <span class="text-sm font-mono text-brand-purple font-bold" id="deliverables-count">3 Angles</span>
+              </div>
+              <input type="range" id="deliverables-slider" min="1" max="10" value="3" class="w-full h-1.5 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-brand-purple">
+            </div>
+
+            <!-- Resolution Selection -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label for="resolution-slider" class="text-sm font-semibold text-neutral-200">3. Target Render Quality (Resolution)</label>
+                <span class="text-sm font-mono text-brand-cyan font-bold" id="resolution-value">4K Ultra HD</span>
+              </div>
+              <input type="range" id="resolution-slider" min="1" max="3" value="2" class="w-full h-1.5 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-brand-cyan">
+            </div>
+
+          </div>
+
+          <!-- Total Calculation Dashboard -->
+          <div class="lg:col-span-5">
+            <div class="rounded-2xl bg-neutral-950/80 p-6 border border-white/5 space-y-6 relative overflow-hidden">
+              <h3 class="text-lg font-bold font-space text-white pb-3 border-b border-white/5">
+                Milestone Projections
+              </h3>
+
+              <div class="space-y-4">
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Base Project Category</span>
+                  <span class="text-sm text-white font-medium" id="preview-type">Product Reveal</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Renders Needed</span>
+                  <span class="text-sm text-white font-medium" id="preview-renders">3 angles</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Estimated Timeline</span>
+                  <span class="text-sm text-brand-cyan font-medium" id="estimate-timeline">~5 business days</span>
+                </div>
+              </div>
+
+              <div class="pt-6 border-t border-white/5 space-y-2">
+                <p class="text-xs text-neutral-400 font-medium">ESTIMATED PRODUCTION COST</p>
+                <div class="flex items-baseline gap-2">
+                  <p class="text-4xl md:text-5xl font-extrabold font-space text-white" id="estimate-cost">$1,200</p>
+                  <p class="text-xs text-neutral-400">USD</p>
+                </div>
+              </div>
+
+              <a href="#contact" class="w-full py-3.5 bg-gradient-to-r from-brand-purple to-brand-cyan hover:opacity-95 text-neutral-950 font-bold rounded-xl text-center block transition-all duration-200">
+                Instantly Lock This Proposal
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT SECTION & GLASSMORPHISM FORM -->
+    <section id="contact" class="py-24 max-w-7xl mx-auto px-6 scroll-reveal">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-stretch">
+        
+        <!-- Left details -->
+        <div class="lg:col-span-5 flex flex-col justify-between">
+          <div class="space-y-6">
+            <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-cyan uppercase">
+              Start The Collaboration
+            </div>
+            <h2 class="text-4xl md:text-5xl font-extrabold font-space text-white tracking-tight">
+              Let's create worlds.
+            </h2>
+            <p class="text-neutral-400 leading-relaxed text-sm md:text-base">
+              Ready to construct photorealistic spatial renderings, motion design sequences, or comprehensive branding visuals? Submit your message parameters, and I will connect with you inside 24 hours.
+            </p>
+          </div>
+
+          <div class="space-y-6 pt-10 lg:pt-0">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-cyan">
+                <i data-lucide="mail" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs text-neutral-400">Direct Email Contact</p>
+                <a href="mailto:singyell@example.com" class="text-sm font-semibold hover:text-brand-purple transition-colors">singyell@example.com</a>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-purple">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs text-neutral-400">Operational Base</p>
+                <p class="text-sm font-semibold">Available Worldwide (Remote CGI)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Form Box -->
+        <div class="lg:col-span-7">
+          <div class="glass-card rounded-3xl p-8 border border-white/5 relative">
+            <form id="portfolio-contact-form" class="space-y-6" onsubmit="handleFormSubmission(event)">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label for="form-name" class="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Your Name</label>
+                  <input type="text" id="form-name" required class="w-full bg-neutral-950/60 border border-white/10 focus:border-brand-purple rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition" placeholder="John Doe">
+                </div>
+                <div class="space-y-2">
+                  <label for="form-email" class="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Your Email</label>
+                  <input type="email" id="form-email" required class="w-full bg-neutral-950/60 border border-white/10 focus:border-brand-purple rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition" placeholder="john@company.com">
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label for="form-service" class="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Category Requested</label>
+                <select id="form-service" class="w-full bg-neutral-950/60 border border-white/10 focus:border-brand-purple rounded-xl px-4 py-3 text-sm text-neutral-400 focus:outline-none transition">
+                  <option value="3d-rendering">Photorealistic 3D Rendering</option>
+                  <option value="cgi-motion">CGI Motion Design</option>
+                  <option value="industrial">Product / Industrial Design</option>
+                  <option value="custom">Other Architectural & Meta Projects</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label for="form-message" class="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Project Spec details</label>
+                <textarea id="form-message" required rows="4" class="w-full bg-neutral-950/60 border border-white/10 focus:border-brand-purple rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition" placeholder="Specify your timeline, parameters, scope..."></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-4 bg-white text-neutral-950 hover:bg-neutral-100 font-bold rounded-xl transition text-center flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                Launch Cosmic Message
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FAQ COLLAPSIBLE SECTION -->
+  <section class="py-24 max-w-4xl mx-auto px-6 scroll-reveal relative z-10">
+    <div class="text-center space-y-4 mb-12">
+      <span class="text-xs font-bold text-brand-cyan tracking-widest uppercase">Answers To Your Doubts</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold font-space text-white tracking-tight">Frequently Answered Specs</h2>
+    </div>
+
+    <div class="space-y-4">
+      <!-- FAQ item 1 -->
+      <div class="glass-card rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+        <button onclick="toggleFAQ(this)" class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-white/[0.02] transition">
+          <span>What software engines do you render with?</span>
+          <i data-lucide="chevron-down" class="w-5 h-5 text-neutral-400 transition-transform"></i>
+        </button>
+        <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-out bg-white/[0.01]">
+          <p class="p-6 text-sm text-neutral-300 leading-relaxed border-t border-white/5">
+            Singyell uses a customized setup centering around Blender Cycles, Cinema 4D, Redshift, and Unreal Engine 5. For procedural work, Houdini particles are exported as high-fidelity render assets.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ item 2 -->
+      <div class="glass-card rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+        <button onclick="toggleFAQ(this)" class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-white/[0.02] transition">
+          <span>What details are required to construct a reliable quote?</span>
+          <i data-lucide="chevron-down" class="w-5 h-5 text-neutral-400 transition-transform"></i>
+        </button>
+        <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-out bg-white/[0.01]">
+          <p class="p-6 text-sm text-neutral-300 leading-relaxed border-t border-white/5">
+            Typically, simple reference sketch files, material blueprints, or specific CAD files (.STEP, .OBJ, .FBX) are perfect. If starting completely from imagination, mood boards or a concept text outline are sufficient.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ item 3 -->
+      <div class="glass-card rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+        <button onclick="toggleFAQ(this)" class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-white/[0.02] transition">
+          <span>How long does a cinematic render project take?</span>
+          <i data-lucide="chevron-down" class="w-5 h-5 text-neutral-400 transition-transform"></i>
+        </button>
+        <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 ease-out bg-white/[0.01]">
+          <p class="p-6 text-sm text-neutral-300 leading-relaxed border-t border-white/5">
+            A standalone high-definition visual usually takes 3 to 7 working days. Fully articulated CGI motion commercials range from 2 to 4 weeks depending on procedural particle assets and camera angles.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/5 bg-neutral-950 py-12 relative z-10 text-xs text-neutral-400">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-purple to-brand-cyan p-[1px]">
+          <div class="w-full h-full bg-neutral-950 rounded-[7px] flex items-center justify-center font-space font-bold text-xs tracking-tighter">
+            S
+          </div>
+        </div>
+        <p class="font-medium text-white">Singyell CGI</p>
+      </div>
+
+      <p>© 2026 Singyell. All rights reserved. Crafted by Gemini 3.5 Flash.</p>
+
+      <!-- Socials -->
+      <div class="flex items-center gap-4">
+        <a href="#" class="hover:text-white transition-colors" aria-label="X (Twitter)"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+        <a href="#" class="hover:text-white transition-colors" aria-label="Instagram"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+        <a href="#" class="hover:text-white transition-colors" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+        <a href="#" class="hover:text-white transition-colors" aria-label="Dribbble"><i data-lucide="dribbble" class="w-4 h-4"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- PORTFOLIO LIGHTBOX MODAL -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-neutral-950/90 backdrop-blur-2xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <button onclick="closeLightbox()" class="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition flex items-center justify-center text-white" aria-label="Close modal">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+
+    <div class="max-w-5xl w-full bg-neutral-900 rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col md:flex-row items-stretch">
+      <div class="md:w-3/5 aspect-video md:aspect-auto bg-neutral-950 relative overflow-hidden">
+        <img id="lightbox-img" src="" class="absolute inset-0 w-full h-full object-cover" alt="Detail render zoomed">
+      </div>
+      <div class="md:w-2/5 p-8 flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <span class="px-3 py-1 bg-brand-purple/10 border border-brand-purple/20 text-brand-purple text-xs font-bold rounded-full uppercase tracking-wider inline-block">CGI Showpiece</span>
+          <h3 id="lightbox-title" class="text-2xl font-bold font-space text-white">Project Title</h3>
+          <p id="lightbox-desc" class="text-sm text-neutral-400 leading-relaxed">Detailed specification explanation of calculations, render setups, and composition strategies.</p>
+        </div>
+
+        <div class="space-y-4 pt-6 border-t border-white/5">
+          <div class="flex items-center gap-2 text-xs text-neutral-300">
+            <i data-lucide="cpu" class="w-4 h-4 text-brand-cyan"></i>
+            <span>Optimized for desktop spatial computing</span>
+          </div>
+          <a href="#contact" onclick="closeLightbox()" class="w-full py-3 bg-white text-neutral-950 hover:bg-neutral-100 font-bold rounded-xl text-center block transition-all">
+            Inquire About Similar Design
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // MOBILE MENU TOGGLE
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+
+    mobileToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        // Simple animation using max-height properties
+        setTimeout(() => {
+          mobileMenu.style.maxHeight = '500px';
+        }, 10);
+        menuIcon.setAttribute('data-lucide', 'x');
+      } else {
+        mobileMenu.style.maxHeight = '0';
+        setTimeout(() => {
+          mobileMenu.classList.add('hidden');
+        }, 300);
+        menuIcon.setAttribute('data-lucide', 'menu');
+      }
+      lucide.createIcons();
+    });
+
+    // Close mobile menu on clicking any navigation anchor
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.style.maxHeight = '0';
+        setTimeout(() => {
+          mobileMenu.classList.add('hidden');
+        }, 300);
+        menuIcon.setAttribute('data-lucide', 'menu');
+        lucide.createIcons();
+      });
+    });
+
+    // SCROLL REVEAL OBSERVER
+    const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+    const observerOptions = {
+      root: null,
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          
+          // Custom skill bars animation triggers
+          if(entry.target.id === 'about') {
+            triggerSkillBars();
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    scrollRevealElements.forEach(element => {
+      revealObserver.observe(element);
+    });
+
+    function triggerSkillBars() {
+      const bars = [
+        document.getElementById('skill-bar-1'),
+        document.getElementById('skill-bar-2'),
+        document.getElementById('skill-bar-3'),
+        document.getElementById('skill-bar-4'),
+        document.getElementById('skill-bar-5')
+      ];
+      bars.forEach(bar => {
+        if (bar) bar.style.transform = 'scale-x(1)';
+      });
+    }
+
+    // CAROUSEL LOGIC
+    const track = document.getElementById('carousel-track');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+    let currentIndex = 1; // Center on second initially
+
+    function updateCarousel() {
+      if(slides.length === 0) return;
+      const slideWidth = slides[0].offsetWidth + 24; // Width + gap
+      const offset = -(currentIndex * slideWidth) + (window.innerWidth / 15);
+      
+      // Safety Clamp
+      track.style.transform = `translateX(${offset}px)`;
+
+      // Set active slide styles
+      slides.forEach((slide, idx) => {
+        if (idx === currentIndex) {
+          slide.style.transform = 'scale(1)';
+          slide.style.opacity = '1';
+        } else {
+          slide.style.transform = 'scale(0.92)';
+          slide.style.opacity = '0.5';
+        }
+      });
+    }
+
+    // Initialize carousel on layout metrics recalculations
+    window.addEventListener('resize', updateCarousel);
+    setTimeout(updateCarousel, 300);
+
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarousel();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < slides.length - 1) {
+        currentIndex++;
+        updateCarousel();
+      }
+    });
+
+    // Touch support for the Featured Work Carousel
+    let startX = 0;
+    let isDragging = false;
+    let currentTranslate = 0;
+
+    track.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    });
+
+    track.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const currentX = e.touches[0].clientX;
+      const diffX = currentX - startX;
+      // Provide visual drag feedback
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0 && currentIndex > 0) {
+          currentIndex--;
+          isDragging = false;
+          updateCarousel();
+        } else if (diffX < 0 && currentIndex < slides.length - 1) {
+          currentIndex++;
+          isDragging = false;
+          updateCarousel();
+        }
+      }
+    });
+
+    track.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    // PORTFOLIO FILTER LOGIC
+    function filterPortfolio(category) {
+      // Toggle button active states
+      const filterBtns = document.querySelectorAll('.portfolio-filter-btn');
+      filterBtns.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(category)) {
+          btn.className = "portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-brand-purple text-white border border-brand-purple/20";
+        } else {
+          btn.className = "portfolio-filter-btn px-5 py-2.5 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-400 hover:text-white border border-white/5";
+        }
+      });
+
+      // Filter grid cards
+      const cards = document.querySelectorAll('.portfolio-grid-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'block';
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+          }, 50);
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 300);
+        }
+      });
+    }
+
+    // LIGHTBOX HANDLERS
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxDesc = document.getElementById('lightbox-desc');
+
+    function openLightbox(imgSrc, title, desc) {
+      lightboxImg.src = imgSrc;
+      lightboxTitle.textContent = title;
+      lightboxDesc.textContent = desc;
+
+      lightboxModal.classList.remove('pointer-events-none');
+      lightboxModal.classList.remove('opacity-0');
+    }
+
+    function closeLightbox() {
+      lightboxModal.classList.add('pointer-events-none');
+      lightboxModal.classList.add('opacity-0');
+    }
+
+    lightboxModal.addEventListener('click', (e) => {
+      if(e.target === lightboxModal) {
+        closeLightbox();
+      }
+    });
+
+    // FAQ SYSTEM LOGIC
+    function toggleFAQ(button) {
+      const parent = button.parentElement;
+      const content = parent.querySelector('.faq-content');
+      const icon = button.querySelector('i');
+      
+      const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+      // Close all FAQs first for accordion behavior
+      document.querySelectorAll('.faq-content').forEach(item => {
+        item.style.maxHeight = '0px';
+        item.parentElement.querySelector('i').style.transform = 'rotate(0deg)';
+      });
+
+      if(!isOpen) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        content.style.maxHeight = '0px';
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // INTERACTIVE ESTIMATOR BUDGET ESTIMATION
+    const deliverablesSlider = document.getElementById('deliverables-slider');
+    const deliverablesCount = document.getElementById('deliverables-count');
+    const resolutionSlider = document.getElementById('resolution-slider');
+    const resolutionValue = document.getElementById('resolution-value');
+
+    const previewType = document.getElementById('preview-type');
+    const previewRenders = document.getElementById('preview-renders');
+    const estimateTimeline = document.getElementById('estimate-timeline');
+    const estimateCost = document.getElementById('estimate-cost');
+
+    let currentScope = 'asset'; // asset, scene, cinematic
+
+    const scopePricing = {
+      asset: { basePrice: 400, renderFactor: 200, label: 'Product Reveal', timeline: 5 },
+      scene: { basePrice: 900, renderFactor: 350, label: 'Landscape Scene', timeline: 10 },
+      cinematic: { basePrice: 1800, renderFactor: 500, label: 'Cinematic Ad', timeline: 18 }
+    };
+
+    function updateScope(scope) {
+      currentScope = scope;
+      
+      // Update design buttons
+      document.querySelectorAll('.estimator-type-btn').forEach(btn => {
+        if(btn.getAttribute('data-type') === scope) {
+          btn.className = "estimator-type-btn p-4 rounded-xl border border-brand-purple/50 bg-brand-purple/10 text-white transition text-left space-y-1";
+        } else {
+          btn.className = "estimator-type-btn p-4 rounded-xl border border-white/5 bg-neutral-900/60 text-neutral-400 transition text-left space-y-1";
+        }
+      });
+
+      calculateEstimate();
+    }
+
+    function calculateEstimate() {
+      const renders = parseInt(deliverablesSlider.value);
+      const resVal = parseInt(resolutionSlider.value);
+
+      deliverablesCount.textContent = `${renders} Render${renders > 1 ? 's' : ''}`;
+
+      let resolutionLabel = '1080p Standard';
+      let multiplier = 1.0;
+      if (resVal === 2) {
+        resolutionLabel = '4K Ultra HD';
+        multiplier = 1.25;
+      } else if (resVal === 3) {
+        resolutionLabel = '8K Super High Detail';
+        multiplier = 1.6;
+      }
+      resolutionValue.textContent = resolutionLabel;
+
+      // Pricing math
+      const pricingObj = scopePricing[currentScope];
+      const costCalculation = Math.round((pricingObj.basePrice + (renders * pricingObj.renderFactor)) * multiplier);
+      const daysCalculation = Math.round(pricingObj.timeline + (renders * 0.8));
+
+      previewType.textContent = pricingObj.label;
+      previewRenders.textContent = `${renders} render angles`;
+      estimateTimeline.textContent = `~${daysCalculation} business days`;
+      estimateCost.textContent = `$${costCalculation.toLocaleString()}`;
+    }
+
+    deliverablesSlider.addEventListener('input', calculateEstimate);
+    resolutionSlider.addEventListener('input', calculateEstimate);
+
+    // Initial load run
+    calculateEstimate();
+
+    // CUSTOM TOAST NOTIFICATION CREATION
+    function triggerToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      
+      const toast = document.createElement('div');
+      toast.className = `glass-card p-4 rounded-xl border border-white/10 shadow-xl flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 text-xs text-white`;
+      
+      let icon = '<i data-lucide="check-circle" class="w-5 h-5 text-brand-cyan"></i>';
+      if (type === 'error') {
+        icon = '<i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>';
+      }
+
+      toast.innerHTML = `
+        ${icon}
+        <div>
+          <p class="font-bold font-space">Production Signal</p>
+          <p class="text-neutral-300 mt-0.5">${message}</p>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4');
+        toast.classList.remove('opacity-0');
+      }, 50);
+
+      // Auto discard toast
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        toast.classList.add('translate-y-2');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 4000);
+    }
+
+    // FORM SUBMISSION HANDLER (Without Alerts)
+    function handleFormSubmission(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('form-name').value;
+      const email = document.getElementById('form-email').value;
+      const message = document.getElementById('form-message').value;
+
+      if(name && email && message) {
+        // Trigger Success feedback
+        triggerToast(`Hello ${name}, your proposal specifications have been logged securely.`, 'success');
+        document.getElementById('portfolio-contact-form').reset();
+      } else {
+        triggerToast('Error: Please complete all operational fields.', 'error');
+      }
+    }
+
+    // WEBGL THREE.JS REALTIME PLAYGROUND GEOMETRY
+    let scene, camera, renderer, crystalMesh, particleSystem;
+    const container = document.getElementById('three-canvas-container');
+
+    function initWebGL() {
+      if(!container) return;
+
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // Scene
+      scene = new THREE.Scene();
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+      camera.position.z = 12;
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Procedural Crystal Geometry (Icosahedron)
+      const geometry = new THREE.IcosahedronGeometry(2.5, 1);
+      const material = new THREE.MeshPhysicalMaterial({
+        color: 0x8b5cf6,
+        emissive: 0x180a2b,
+        roughness: 0.2,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.85,
+        transmission: 0.6,
+        ior: 1.5,
+        wireframe: true
+      });
+
+      crystalMesh = new THREE.Mesh(geometry, material);
+      scene.add(crystalMesh);
+
+      // Procedural Constellation Points
+      const pointsCount = 40;
+      const pointsGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(pointsCount * 3);
+
+      for (let i = 0; i < pointsCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 8;
+      }
+
+      pointsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const pointsMat = new THREE.PointsMaterial({
+        color: 0x06b6d4,
+        size: 0.1,
+        transparent: true,
+        opacity: 0.8
+      });
+
+      particleSystem = new THREE.Points(pointsGeo, pointsMat);
+      scene.add(particleSystem);
+
+      // Light setup
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0x06b6d4, 1.2);
+      dirLight1.position.set(5, 5, 5);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0x8b5cf6, 1);
+      dirLight2.position.set(-5, -5, 5);
+      scene.add(dirLight2);
+
+      // Simple mouse drag interactivity
+      let isMouseDown = false;
+      let prevMouseX = 0;
+      let prevMouseY = 0;
+
+      container.addEventListener('mousedown', (e) => {
+        isMouseDown = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+
+      window.addEventListener('mouseup', () => {
+        isMouseDown = false;
+      });
+
+      container.addEventListener('mousemove', (e) => {
+        if (!isMouseDown) return;
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+
+        crystalMesh.rotation.y += deltaX * 0.005;
+        crystalMesh.rotation.x += deltaY * 0.005;
+
+        particleSystem.rotation.y += deltaX * 0.002;
+
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+
+      // Simple touch drag support
+      container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isMouseDown = true;
+          prevMouseX = e.touches[0].clientX;
+          prevMouseY = e.touches[0].clientY;
+        }
+      });
+
+      container.addEventListener('touchmove', (e) => {
+        if (!isMouseDown || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - prevMouseX;
+        const deltaY = e.touches[0].clientY - prevMouseY;
+
+        crystalMesh.rotation.y += deltaX * 0.008;
+        crystalMesh.rotation.x += deltaY * 0.008;
+        particleSystem.rotation.y += deltaX * 0.004;
+
+        prevMouseX = e.touches[0].clientX;
+        prevMouseY = e.touches[0].clientY;
+      });
+
+      container.addEventListener('touchend', () => {
+        isMouseDown = false;
+      });
+
+      // Canvas Reset Button Logic
+      document.getElementById('three-reset-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        crystalMesh.rotation.set(0, 0, 0);
+        particleSystem.rotation.set(0, 0, 0);
+        triggerToast('Interactive render metrics reset.', 'success');
+      });
+
+      animateWebGL();
+    }
+
+    function animateWebGL() {
+      requestAnimationFrame(animateWebGL);
+
+      // Auto rotation passive drift
+      if (crystalMesh) {
+        crystalMesh.rotation.y += 0.002;
+        crystalMesh.rotation.z += 0.001;
+      }
+      if (particleSystem) {
+        particleSystem.rotation.y -= 0.001;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Adapt to parent container resizes
+    window.addEventListener('resize', () => {
+      if(!container || !camera || !renderer) return;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    });
+
+    // Run initializer on complete page assets load
+    window.onload = function () {
+      initWebGL();
+    }
+  </script>
+</body>
+</html>
